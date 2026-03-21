@@ -1,0 +1,22 @@
+<module name="obstacle_detector" dir="obstacle_detector">
+    <doc><description>YOLO Avoider using BBox Area and Local Visualization</description></doc>
+    <settings>
+        <dl_settings>
+            <dl_settings name="Obstacle">
+                <dl_setting min="0.01" max="0.5" step="0.01" var="area_threshold" shortname="area_thr"/>
+            </dl_settings>
+        </dl_settings>
+    </settings>
+    <header>
+        <file name="obstacle_detector.h"/>
+    </header>
+    <init fun="obstacle_detector_init()"/>
+    <periodic fun="obstacle_detector_periodic()" freq="4"/>
+    <makefile target="ap|nps">
+        <file name="obstacle_detector.cpp"/>
+        <raw>
+            $(TARGET).CFLAGS += $(shell pkg-config --cflags opencv4 || pkg-config --cflags opencv)
+            $(TARGET).LDFLAGS += $(shell pkg-config --libs opencv4 || pkg-config --libs opencv)
+        </raw>
+    </makefile>
+</module>
