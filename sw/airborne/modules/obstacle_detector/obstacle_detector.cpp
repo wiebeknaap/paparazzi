@@ -70,7 +70,7 @@ struct image_t * detect_obstacle_yolo(struct image_t *img, uint8_t camera_id) {
         std::vector<cv::String> outNames = yolo_net.getUnconnectedOutLayersNames();
         std::vector<cv::Mat> outs;
         yolo_net.forward(outs, outNames);
-
+        fprintf(stderr, "[YOLO] yolo has ran\n");
         if (!outs.empty()) {
             cv::Mat output = outs[0];
             int num_proposals = (output.dims == 3) ? output.size[1] : output.rows;
