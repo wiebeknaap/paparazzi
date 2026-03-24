@@ -24,4 +24,7 @@
 extern void mav_exercise_init(void);
 extern void mav_exercise_periodic(void);
 
+extern float oa_heading_increment;
+extern float divergence_threshold;
+
 #endif //PAPARAZZI_MAV_EXERCISE_H
