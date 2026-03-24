@@ -1,0 +1,35 @@
+<!DOCTYPE settings SYSTEM "settings.dtd">
+
+<settings>
+    <dl_settings NAME="Obstacle AI">
+
+        <dl_settings NAME="Sensitivity">
+            <dl_setting MAX="5000" MIN="0" STEP="50" VAR="weight_pole" shortname="Pole Pixels" unit="px"/>
+            <dl_setting MAX="5000" MIN="0" STEP="50" VAR="weight_plant" shortname="Plant Pixels" unit="px"/>
+            <dl_setting MAX="240" MIN="0" STEP="1" VAR="scan_y_start" shortname="Scan Top"/>
+            <dl_setting MAX="240" MIN="0" STEP="1" VAR="scan_y_end" shortname="Scan Bottom"/>
+        </dl_settings>
+
+        <dl_settings NAME="Orange Colors">
+            <dl_setting MAX="255" MIN="0" STEP="1" VAR="pole_u_min" shortname="U Min"/>
+            <dl_setting MAX="255" MIN="0" STEP="1" VAR="pole_u_max" shortname="U Max"/>
+            <dl_setting MAX="255" MIN="0" STEP="1" VAR="pole_v_min" shortname="V Min"/>
+            <dl_setting MAX="255" MIN="0" STEP="1" VAR="pole_v_max" shortname="V Max"/>
+        </dl_settings>
+
+        <dl_settings NAME="Green Colors">
+            <dl_setting MAX="255" MIN="0" STEP="1" VAR="plant_u_min" shortname="U Min"/>
+            <dl_setting MAX="255" MIN="0" STEP="1" VAR="plant_u_max" shortname="U Max"/>
+            <dl_setting MAX="255" MIN="0" STEP="1" VAR="plant_v_min" shortname="V Min"/>
+            <dl_setting MAX="255" MIN="0" STEP="1" VAR="plant_v_max" shortname="V Max"/>
+        </dl_settings>
+
+        <dl_settings NAME="Navigation">
+            <dl_setting MAX="90" MIN="0" STEP="1" VAR="turn_speed_avoid" shortname="Avoid Turn" unit="deg"/>
+            <dl_setting MAX="90" MIN="0" STEP="1" VAR="turn_speed_recover" shortname="OOB Turn" unit="deg"/>
+            <dl_setting MAX="5" MIN="0" STEP="0.1" VAR="dist_forward_safe" shortname="Safe Speed" unit="m"/>
+            <dl_setting MAX="5" MIN="0" STEP="0.1" VAR="dist_forward_avoid" shortname="Avoid Speed" unit="m"/>
+        </dl_settings>
+
+    </dl_settings>
+</settings>

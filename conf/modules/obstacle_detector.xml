@@ -1,0 +1,53 @@
+<!DOCTYPE module SYSTEM "module.dtd">
+
+<module name="obstacle_detector" dir="obstacle_detector">
+    <doc>
+        <description>Fast YUV Color-based Obstacle Avoidance</description>
+    </doc>
+
+    <settings>
+        <dl_settings NAME="Obstacle AI">
+
+            <dl_settings NAME="Sensitivity">
+                <dl_setting MAX="5000" MIN="0" STEP="50" VAR="weight_pole" shortname="Pole_Px"/>
+                <dl_setting MAX="5000" MIN="0" STEP="50" VAR="weight_plant" shortname="Plant_Px"/>
+                <dl_setting MAX="240" MIN="0" STEP="1" VAR="scan_y_start" shortname="Top"/>
+                <dl_setting MAX="240" MIN="0" STEP="1" VAR="scan_y_end" shortname="Bottom"/>
+            </dl_settings>
+
+            <dl_settings NAME="Orange (Poles)">
+                <dl_setting MAX="255" MIN="0" STEP="1" VAR="pole_u_min" shortname="U_Min"/>
+                <dl_setting MAX="255" MIN="0" STEP="1" VAR="pole_u_max" shortname="U_Max"/>
+                <dl_setting MAX="255" MIN="0" STEP="1" VAR="pole_v_min" shortname="V_Min"/>
+                <dl_setting MAX="255" MIN="0" STEP="1" VAR="pole_v_max" shortname="V_Max"/>
+            </dl_settings>
+
+            <dl_settings NAME="Green (Plants)">
+                <dl_setting MAX="255" MIN="0" STEP="1" VAR="plant_u_min" shortname="U_Min"/>
+                <dl_setting MAX="255" MIN="0" STEP="1" VAR="plant_u_max" shortname="U_Max"/>
+                <dl_setting MAX="255" MIN="0" STEP="1" VAR="plant_v_min" shortname="V_Min"/>
+                <dl_setting MAX="255" MIN="0" STEP="1" VAR="plant_v_max" shortname="V_Max"/>
+            </dl_settings>
+
+            <dl_settings NAME="Navigation">
+                <dl_setting MAX="90" MIN="0" STEP="1" VAR="turn_speed_avoid" shortname="Avoid_Turn"/>
+                <dl_setting MAX="90" MIN="0" STEP="1" VAR="turn_speed_recover" shortname="OOB_Turn"/>
+                <dl_setting MAX="5" MIN="0" STEP="0.1" VAR="dist_forward_safe" shortname="Safe_Spd"/>
+                <dl_setting MAX="5" MIN="0" STEP="0.1" VAR="dist_forward_avoid" shortname="Avoid_Spd"/>
+            </dl_settings>
+
+        </dl_settings>
+    </settings>
+
+    <header>
+        <file name="obstacle_detector.h"/>
+    </header>
+
+    <init fun="obstacle_detector_init()"/>
+    <periodic fun="obstacle_detector_periodic()" freq="4"/>
+
+    <makefile target="ap|nps">
+        <file name="obstacle_detector.c"/>
+        <include name="$(PAPARAZZI_SRC)/sw/airborne/modules/computer_vision"/>
+    </makefile>
+</module>
