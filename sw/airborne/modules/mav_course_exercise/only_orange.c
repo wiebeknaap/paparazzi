@@ -27,8 +27,8 @@
 static abi_event color_detection_ev;
 static bool orange_updated = false;
 
-float orange_detect_threshold = 0.02f;
-float middle_strong_threshold = 0.10f;
+float orange_detect_threshold = 0.1f;
+float middle_strong_threshold = 0.14f;
 int low_conf_threshold = 1;
 int high_conf_threshold = 3;
 int max_confidence = 5;
@@ -175,7 +175,7 @@ enum action decide_action(const struct orange_info *orange, int confidence)
   enum action candidate = FORWARD;
 
   if (middle >= middle_strong_threshold) {
-    candidate = (left <= right) ? LEFT : RIGHT;
+    candidate = (left < right) ? LEFT : RIGHT;
   }
   else if (left > right && left > middle) {
     candidate = RIGHT;
