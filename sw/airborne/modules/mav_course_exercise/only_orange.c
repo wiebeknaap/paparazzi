@@ -28,10 +28,16 @@ static abi_event color_detection_ev;
 static bool orange_updated = false;
 
 float orange_detect_threshold = 0.02f;
-float middle_strong_threshold = 0.1f;
+float middle_strong_threshold = 0.10f;
 int low_conf_threshold = 1;
 int high_conf_threshold = 3;
 int max_confidence = 5;
+
+float side_switch_margin = 0.08f;
+float center_exit_threshold = 0.04f;
+int hold_turn_cycles = 6;
+int committed_turn_cycles = 0;
+enum action committed_action = FORWARD;
 
 static const float left_region_fraction   = 0.35f;
 static const float middle_region_fraction = 0.30f;
@@ -134,7 +140,8 @@ int update_confidence(const struct orange_info *orange){
   return obstacle_confidence;
 }
 
-enum action decide_action(const struct orange_info *orange, int confidence){
+enum action decide_action(const struct orange_info *orange, int confidence)
+{
   float left = 0.f;
   float middle = 0.f;
   float right = 0.f;
@@ -144,36 +151,65 @@ enum action decide_action(const struct orange_info *orange, int confidence){
     middle = orange->middle_fraction;
     right = orange->right_fraction;
   }
-  
+
   if (confidence <= low_conf_threshold) {
-      return FORWARD;
+    committed_action = FORWARD;
+    committed_turn_cycles = 0;
+    return FORWARD;
   }
+
+  /* Alleen kort vasthouden, maar niet eindeloos opnieuw committen */
+  if ((committed_action == LEFT || committed_action == RIGHT) &&
+      committed_turn_cycles > 0) {
+    committed_turn_cycles--;
+    return committed_action;
+  }
+
+  /* Als object niet meer duidelijk in midden zit: weer vooruit */
+  if (middle < center_exit_threshold) {
+    committed_action = FORWARD;
+    committed_turn_cycles = 0;
+    return FORWARD;
+  }
+
+  enum action candidate = FORWARD;
 
   if (middle >= middle_strong_threshold) {
-    if (left <= right) {
-      return LEFT;
+    candidate = (left <= right) ? LEFT : RIGHT;
+  }
+  else if (left > right && left > middle) {
+    candidate = RIGHT;
+  }
+  else if (right > left && right > middle) {
+    candidate = LEFT;
+  }
+  else {
+    candidate = FORWARD;
+  }
+
+  /* Alleen van kant wisselen als verschil echt groot genoeg is */
+  if (committed_action == LEFT && candidate == RIGHT) {
+    if ((left - right) < side_switch_margin) {
+      candidate = FORWARD;
     }
-    else {
-      return RIGHT;
+  }
+  else if (committed_action == RIGHT && candidate == LEFT) {
+    if ((right - left) < side_switch_margin) {
+      candidate = FORWARD;
     }
   }
 
-  if (left > middle && left > right) {
-    return RIGHT;
-  }
-
-  if (right > middle && right > left) {
-    return LEFT;
-  }
-
-  if (confidence >= high_conf_threshold) {
-    if (left <= right) {
-      return LEFT;
+  if (candidate == LEFT || candidate == RIGHT) {
+    if (candidate != committed_action) {
+      committed_action = candidate;
+      committed_turn_cycles = hold_turn_cycles;
     }
-    return RIGHT;
+  } else {
+    committed_action = FORWARD;
+    committed_turn_cycles = 0;
   }
 
-  return FORWARD;
+  return candidate;
 }
 
 const char *action_name(enum action action){
@@ -278,6 +314,8 @@ void only_orange_init(void)
 
   obstacle_confidence = 0;
   last_action = SEARCH;
+  committed_action = FORWARD;
+  committed_turn_cycles = 0;
   orange_updated = false;
 
   AbiBindMsgVISUAL_DETECTION(ONLY_ORANGE_VISUAL_DETECTION_ID,

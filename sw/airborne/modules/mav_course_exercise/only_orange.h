@@ -36,6 +36,12 @@ extern int low_conf_threshold;
 extern int high_conf_threshold;
 extern int max_confidence;
 
+extern float side_switch_margin;
+extern float center_exit_threshold;
+extern int hold_turn_cycles;
+extern int committed_turn_cycles;
+extern enum action committed_action;
+
 extern struct orange_info orange_raw;
 extern struct orange_info orange_filtered;
 extern int obstacle_confidence;

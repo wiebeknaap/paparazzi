@@ -15,9 +15,9 @@
 #endif
 
 #define SOBEL_THRESHOLD        30
-#define EDGE_DENSITY_THRESHOLD 0.10f
+#define EDGE_DENSITY_THRESHOLD 0.16f
 #define MIN_VERTICAL_FILL      0.03f
-#define TURN_THRESHOLD         0.4f
+#define TURN_THRESHOLD         0.56f
 
 #define ROI_X_START 0.1f
 #define ROI_X_END   0.9f
