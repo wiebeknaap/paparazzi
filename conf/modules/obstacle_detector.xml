@@ -14,6 +14,7 @@
     <periodic fun="obstacle_detector_periodic()" freq="4"/>
     <makefile target="ap|nps">
         <file name="obstacle_detector.cpp"/>
+        <file name="best_model.c"/>
         <raw>
             $(TARGET).CFLAGS += $(shell pkg-config --cflags opencv4 || pkg-config --cflags opencv)
             $(TARGET).LDFLAGS += $(shell pkg-config --libs opencv4 || pkg-config --libs opencv)

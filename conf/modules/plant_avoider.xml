@@ -1,0 +1,17 @@
+<!DOCTYPE module SYSTEM "module.dtd">
+<module name="plant_avoider" dir="mav_course_exercise">
+    <doc>
+        <description>
+            Sobel vertical-edge obstacle avoider for plants.
+            Fills plant_avoider_result (safe_col, obstacle_detected, unsafe_ratio)
+            which is read by mav_course_exercise.
+        </description>
+    </doc>
+    <header>
+        <file name="plant_avoider.h"/>
+    </header>
+    <init fun="plant_avoider_init()"/>
+    <makefile>
+        <file name="plant_avoider.c"/>
+    </makefile>
+</module>

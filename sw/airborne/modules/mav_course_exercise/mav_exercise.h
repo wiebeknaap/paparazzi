@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Matteo Barbera <matteo.barbera97@gmail.com>
+* Copyright (C) 2021 Matteo Barbera <matteo.barbera97@gmail.com>
  *
  * This file is part of Paparazzi.
  *
@@ -23,5 +23,8 @@
 
 extern void mav_exercise_init(void);
 extern void mav_exercise_periodic(void);
+
+extern float oa_heading_increment;
+extern float divergence_threshold;
 
 #endif //PAPARAZZI_MAV_EXERCISE_H
