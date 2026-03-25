@@ -1,0 +1,102 @@
+<!--
+  gate_guidance.xml
+  Paparazzi module XML for the gate guidance state machine.
+
+  INSTALLATION
+  ============
+  Copy this file to: paparazzi/conf/modules/gate_guidance.xml
+  Copy gate_guidance.h to: paparazzi/sw/airborne/modules/gate_detector/gate_guidance.h
+  Copy gate_guidance.c to: paparazzi/sw/airborne/modules/gate_detector/gate_guidance.c
+
+  In your airframe XML, declare AFTER gate_detector and video_thread:
+
+    <module name="video_thread"/>
+    <module name="gate_detector">
+      <define name="GATE_DETECTOR_CAMERA" value="front_camera"/>
+    </module>
+    <module name="gate_guidance"/>
+
+  In your GUIDED-mode flight plan START block call setGuided() then stay,
+  as shown in the crash course (Section 4.2.6). The module handles its own
+  guidance commands once the autopilot is in GUIDED mode:
+
+    <block name="START">
+      <call_once fun="setGuided()"/>
+      <stay wp="STDBY"/>
+    </block>
+    <block name="STOP">
+      <call_once fun="NavSetWaypointHere(WP_STDBY)"/>
+      <call_once fun="setNav()"/>
+      <stay wp="STDBY"/>
+    </block>
+
+  STATE MACHINE (7 states)
+  ========================
+  SEARCH   ->  spin in place (yaw_rate = search_yaw_rate)
+  ACQUIRE  ->  gate visible >= 2 frames; hover, wait for lock
+  ALIGN    ->  reduce lateral/vertical error; creep forward slowly
+  APPROACH ->  aligned; advance at approach_vx
+  COMMIT   ->  gate fills > 18% of frame width; accelerate to commit_vx
+  PASS     ->  gate fills > 35% of frame width; full-speed pass
+  LOST     ->  > lost_frame_limit misses; fall back to SEARCH
+
+  All gains and thresholds are GCS-settable (no recompile required).
+-->
+
+<module name="gate_guidance" dir="gate_detector">
+  <doc>
+    <description>
+      Gate guidance state machine for drone racing. Reads gate detections from
+      gate_detector (via gate_latest struct), produces body-frame velocity and
+      yaw-rate setpoints, and sends them to the Paparazzi guidance_h controller
+      while the autopilot is in GUIDED mode.
+    </description>
+    <define name="GATE_GUIDANCE_FREQ" value="15"
+            description="Periodic frequency Hz -- must match gate_detector FPS (default 15)"/>
+  </doc>
+
+  <header>
+    <file name="gate_guidance.h"/>
+  </header>
+
+  <init    fun="gate_guidance_init()"/>
+  <periodic fun="gate_guidance_periodic()" freq="15" autorun="TRUE"/>
+
+  <settings>
+    <dl_settings name="GateGuidance">
+      <!-- Proportional gains -->
+      <dl_setting var="gg_cfg.k_lat"  min="0.1" step="0.05" max="2.0"
+                  shortname="k_lat"   module="gate_detector/gate_guidance"/>
+      <dl_setting var="gg_cfg.k_vert" min="0.1" step="0.05" max="2.0"
+                  shortname="k_vert"  module="gate_detector/gate_guidance"/>
+      <dl_setting var="gg_cfg.k_yaw"  min="0.1" step="0.05" max="2.5"
+                  shortname="k_yaw"   module="gate_detector/gate_guidance"/>
+      <!-- Search behaviour -->
+      <dl_setting var="gg_cfg.search_yaw_rate" min="0.05" step="0.05" max="1.0"
+                  shortname="srch_yaw" module="gate_detector/gate_guidance"/>
+      <!-- Forward velocities -->
+      <dl_setting var="gg_cfg.approach_vx" min="0.1" step="0.05" max="1.5"
+                  shortname="app_vx"  module="gate_detector/gate_guidance"/>
+      <dl_setting var="gg_cfg.commit_vx"   min="0.1" step="0.05" max="2.0"
+                  shortname="cmt_vx"  module="gate_detector/gate_guidance"/>
+      <dl_setting var="gg_cfg.pass_vx"     min="0.1" step="0.05" max="2.5"
+                  shortname="pass_vx" module="gate_detector/gate_guidance"/>
+      <!-- State-transition tolerances -->
+      <dl_setting var="gg_cfg.align_tol"   min="0.02" step="0.01" max="0.40"
+                  shortname="aln_tol" module="gate_detector/gate_guidance"/>
+      <dl_setting var="gg_cfg.commit_tol"  min="0.01" step="0.01" max="0.20"
+                  shortname="cmt_tol" module="gate_detector/gate_guidance"/>
+      <dl_setting var="gg_cfg.confidence_acquire" min="0.20" step="0.05" max="0.80"
+                  shortname="min_conf" module="gate_detector/gate_guidance"/>
+      <dl_setting var="gg_cfg.lost_frame_limit" min="3" step="1" max="30"
+                  shortname="lost_lim" module="gate_detector/gate_guidance"/>
+      <!-- 0 = compute but do not send commands to autopilot (safe for testing) -->
+      <dl_setting var="gg_enabled" min="0" step="1" max="1"
+                  shortname="enabled" module="gate_detector/gate_guidance"/>
+    </dl_settings>
+  </settings>
+
+  <makefile>
+    <file name="gate_guidance.c"/>
+  </makefile>
+</module>
