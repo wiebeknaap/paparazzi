@@ -48,7 +48,7 @@ enum navigation_state_t navigation_state = SAFE;
 int32_t color_count = 0;
 int16_t obstacle_free_confidence = 0;
 float moveDistance = 0.5;
-float oob_haeding_increment = 10.f;
+float oob_haeding_increment = 3.f;
 const int16_t max_trajectory_confidence = 2;
 float divergence = 0.f;
 static bool obstacle_entry = false;
@@ -60,7 +60,7 @@ static bool obstacle_entry = false;
 #define MAV_EXERCISE_OPTICAL_FLOW_ID ABI_BROADCAST
 #endif
 #ifndef MAV_EXERCISE_HEADING_INCREMENT
-#define MAV_EXERCISE_HEADING_INCREMENT 10.f
+#define MAV_EXERCISE_HEADING_INCREMENT 3.f
 #endif
 float oa_heading_increment = MAV_EXERCISE_HEADING_INCREMENT;
 
