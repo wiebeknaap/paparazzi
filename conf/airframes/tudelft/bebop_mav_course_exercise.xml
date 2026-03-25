@@ -7,6 +7,7 @@
 
   <firmware name="rotorcraft">
     <target name="ap" board="bebop">
+      <define name="VERBOSE" value="1"/>
       <define name="VIDEO_CAPTURE_PATH" value="/data/ftp/internal_000/images"/>
       <define name="LOGGER_FILE_PATH" value="/data/ftp/internal_000/log"/>
       <define name="MT9V117_TARGET_FPS" value="20"/>
