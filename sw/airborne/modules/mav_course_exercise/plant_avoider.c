@@ -137,21 +137,24 @@ static struct image_t *plant_avoider_cb(struct image_t *img,
 
   free(mask);
 
-  /* ── 5. Unsafe ratio: all rows, middle 5 columns ────── */
+  /* ── 5. Unsafe ratio: centre box of a 3×3 grid ────── */
   int mid_col = GRID_COLS / 2;
-  uint32_t unsafe_cnt = 0;
-  uint32_t considered_rows = 0;
+  int row_start = GRID_ROWS / 3;
+  int row_end   = (2 * GRID_ROWS) / 3;
+  int col_start = GRID_COLS / 3;
+  int col_end   = (2 * GRID_COLS) / 3;
 
-/* Only use lower part of image for obstacle decision */
-  for (int r = GRID_ROWS / 2; r < GRID_ROWS; r++) {
-    for (int c = mid_col - 2; c <= mid_col + 2; c++) {
+  uint32_t unsafe_cnt = 0;
+  uint32_t total_cells = (row_end - row_start) * (col_end - col_start);
+
+  for (int r = row_start; r < row_end; r++) {
+    for (int c = col_start; c < col_end; c++) {
       unsafe_cnt += obs[r][c];
     }
-    considered_rows++;
   }
 
-  float unsafe_ratio = (considered_rows > 0)
-    ? (float)unsafe_cnt / (float)(considered_rows * 5)
+  float unsafe_ratio = (total_cells > 0)
+    ? (float)unsafe_cnt / (float)total_cells
     : 0.f;
 
   /* ── 6. Count safe cells on left vs right half ───────── */
