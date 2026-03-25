@@ -1,0 +1,46 @@
+<module name="gate_detector" dir="gate_detector">
+  <doc>
+    <description>
+      Blue post-pair gate detector for drone racing. Processes YUV422 images
+      directly, without OpenCV. Publishes gate position via VISUAL_DETECTION
+      ABI message and exposes the latest result through the gate_latest global struct.
+    </description>
+
+    <define name="GATE_DETECTOR_CAMERA" value="front_camera"
+            description="Camera device to use"/>
+    <define name="GATE_DETECTOR_FPS" value="15"
+            description="Callback frequency in Hz"/>
+    <define name="GATE_DETECTOR_VERBOSE" value=""
+            description="Define to enable printf status messages"/>
+
+    <section name="GATE_THRESHOLDS" prefix="GATE_">
+      <define name="U_MIN" value="130" description="Min U channel value for blue pixel"/>
+      <define name="U_MAX" value="255" description="Max U channel value for blue pixel"/>
+      <define name="V_MIN" value="50"  description="Min V channel value for blue pixel"/>
+      <define name="V_MAX" value="150" description="Max V channel value for blue pixel"/>
+      <define name="Y_MIN" value="20"  description="Min Y luma for blue pixel"/>
+      <define name="Y_MAX" value="220" description="Max Y luma for blue pixel"/>
+    </section>
+
+    <section name="GATE_GEOMETRY" prefix="GATE_">
+      <define name="POST_MIN_ASPECT" value="1.5" description="Min post height to width ratio"/>
+      <define name="POST_MAX_ASPECT" value="14.0" description="Max post height to width ratio"/>
+      <define name="COL_DENSITY_MIN" value="0.18" description="Min column blue fill fraction"/>
+      <define name="MIN_GAP_TO_POST_W" value="1.5" description="Min gap over max post width"/>
+      <define name="MAX_OPENING_ASPECT" value="2.2" description="Max opening width to height ratio"/>
+      <define name="MIN_CONFIDENCE" value="0.50" description="Detection score threshold in [0,1]"/>
+      <define name="PURITY_U_HARD_FLOOR" value="120" description="Min mean U in post"/>
+    </section>
+  </doc>
+
+  <header>
+    <file name="gate_detector.h"/>
+  </header>
+
+  <init fun="gate_detector_init()"/>
+  <periodic fun="gate_detector_periodic()" freq="15" autorun="TRUE"/>
+
+  <makefile>
+    <file name="gate_detector.c"/>
+  </makefile>
+</module>

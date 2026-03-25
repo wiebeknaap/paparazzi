@@ -4,13 +4,11 @@
   <description>MAVLAB Course TUDelft 2023
   </description>
 
-
   <firmware name="rotorcraft">
     <target name="ap" board="bebop">
       <define name="VIDEO_CAPTURE_PATH" value="/data/ftp/internal_000/images"/>
       <define name="LOGGER_FILE_PATH" value="/data/ftp/internal_000/log"/>
       <define name="MT9V117_TARGET_FPS" value="20"/>
-
 
       <!-- Detect orange -->
       <define name="COLOR_OBJECT_DETECTOR_LUM_MIN1" value="30"/>
@@ -19,10 +17,12 @@
       <define name="COLOR_OBJECT_DETECTOR_CB_MAX1" value="130"/>
       <define name="COLOR_OBJECT_DETECTOR_CR_MIN1" value="150"/>
       <define name="COLOR_OBJECT_DETECTOR_CR_MAX1" value="190"/>
+
       <module name="ahrs" type="int_cmpl_quat">
         <configure name="USE_MAGNETOMETER" value="FALSE"/>
         <define name="AHRS_USE_GPS_HEADING" value="TRUE"/>
       </module>
+
       <module name="cv_opticflow">
         <define name="OPTICFLOW_CAMERA" value="front_camera"/>
         <define name="MAX_HORIZON" value="10"/>
@@ -33,8 +33,8 @@
         <define name="OPTICFLOW_DEROTATION_CORRECTION_FACTOR_Y" value="0.85"/>
         <define name="MAX_TRACK_CORNERS" value="10"/>
       </module>
-
     </target>
+
     <target name="nps" board="pc">
       <module name="fdm" type="gazebo"/>
       <module name="gps" type="ublox"/>
@@ -48,6 +48,7 @@
       <define name="COLOR_OBJECT_DETECTOR_CB_MAX1" value="121"/>
       <define name="COLOR_OBJECT_DETECTOR_CR_MIN1" value="134"/>
       <define name="COLOR_OBJECT_DETECTOR_CR_MAX1" value="249"/>
+
       <module name="ahrs" type="float_mlkf">
         <configure name="USE_MAGNETOMETER" value="FALSE"/>
         <define name="AHRS_USE_GPS_HEADING" value="TRUE"/>
@@ -56,7 +57,7 @@
 
     <define name="ARRIVED_AT_WAYPOINT" value="0.3"/>
 
-  <!-- Subsystem section -->
+    <!-- Subsystem section -->
     <module name="telemetry" type="transparent_udp"/>
     <module name="radio_control" type="datalink"/>
     <module name="motor_mixing"/>
@@ -71,26 +72,43 @@
 
     <!-- Video/Camera modules -->
     <module name="bebop_cam"/>
+
+    <!-- Needed for custom gate detector -->
+    <module name="video_thread">
+      <define name="FRONT_CAMERA_ROTATE" value="TRUE"/>
+    </module>
+
     <module name="video_capture">
       <define name="VIDEO_CAPTURE_CAMERA" value="front_camera"/>
       <define name="VIDEO_CAPTURE_FPS" value="10"/>
     </module>
+
     <module name="cv_detect_color_object">
       <define name="COLOR_OBJECT_DETECTOR_CAMERA1" value="front_camera"/>
       <define name="COLOR_OBJECT_DETECTOR_FPS1" value="0"/>
       <define name="COLOR_OBJECT_DETECTOR_DRAW1" value="1"/>
     </module>
+
+    <!-- Gate detector runs in parallel; mav_exercise decides when to use it -->
+    <module name="gate_detector">
+      <define name="GATE_DETECTOR_CAMERA" value="front_camera"/>
+      <define name="GATE_DETECTOR_FPS" value="15"/>
+    </module>
+
     <module name="mav_course_exercise">
       <define name="ORANGE_AVOIDER_VISUAL_DETECTION_ID" value="COLOR_OBJECT_DETECTION1_ID"/>
     </module>
+
     <module name="plant_avoider" dir="mav_course_exercise">
       <define name="PLANT_AVOIDER_CAMERA" value="front_camera"/>
       <define name="PLANT_AVOIDER_FPS" value="4"/>
     </module>
+
     <!-- only_orange uses the same color detector output as mav_course_exercise -->
     <module name="only_orange" dir="mav_course_exercise">
       <define name="ONLY_ORANGE_VISUAL_DETECTION_ID" value="COLOR_OBJECT_DETECTION1_ID"/>
     </module>
+
     <module name="video_rtp_stream">
       <define name="VIEWVIDEO_CAMERA" value="front_camera"/>
       <define name="VIEWVIDEO_CAMERA2" value="bottom_camera"/>
@@ -158,9 +176,7 @@
   </section>
 
   <!-- local magnetic field -->
-  <!-- http://wiki.paparazziuav.org/wiki/Subsystem/ahrs#Local_Magnetic_Field -->
   <section name="AHRS" prefix="AHRS_">
-    <!-- values used if no GPS fix, on 3D fix is update by geo_mag module -->
     <!-- Delft -->
     <define name="H_X" value="0.3892503"/>
     <define name="H_Y" value="0.0017972"/>
@@ -174,13 +190,12 @@
     <define name="SONAR_MAX_RANGE" value="2.2"/>
     <define name="SONAR_UPDATE_ON_AGL" value="TRUE"/>
 
-    <!-- Use GPS altitude measurments and set the R gain -->
+    <!-- Use GPS altitude measurements and set the R gain -->
     <define name="USE_GPS_ALT" value="1"/>
     <define name="VFF_R_GPS" value="0.01"/>
   </section>
 
   <section name="RC_SETPOINT" prefix="STABILIZATION_ATTITUDE_">
-    <!-- setpoint limits for attitude stabilization rc flight -->
     <define name="SP_MAX_PHI" value="45" unit="deg"/>
     <define name="SP_MAX_THETA" value="45" unit="deg"/>
     <define name="SP_MAX_R" value="120" unit="deg/s"/>
@@ -190,7 +205,6 @@
   </section>
 
   <section name="ATTITUDE_REFERENCE" prefix="STABILIZATION_ATTITUDE_">
-    <!-- attitude reference generation model -->
     <define name="REF_OMEGA_P" value="450" unit="deg/s"/>
     <define name="REF_ZETA_P" value="0.9"/>
     <define name="REF_MAX_P" value="600." unit="deg/s"/>
@@ -208,13 +222,11 @@
   </section>
 
   <section name="STABILIZATION_ATTITUDE_INDI" prefix="STABILIZATION_INDI_">
-    <!-- control effectiveness -->
     <define name="G1_P" value="0.0397"/>
     <define name="G1_Q" value="0.0299"/>
     <define name="G1_R" value="0.0014"/>
     <define name="G2_R" value="0.1219"/>
 
-    <!-- reference acceleration for attitude control -->
     <define name="REF_ERR_P" value="600.0"/>
     <define name="REF_ERR_Q" value="600.0"/>
     <define name="REF_ERR_R" value="600.0"/>
@@ -222,19 +234,15 @@
     <define name="REF_RATE_Q" value="28.0"/>
     <define name="REF_RATE_R" value="28.0"/>
 
-    <!--Maxium yaw rate, to avoid instability-->
     <define name="MAX_R" value="120.0" unit="deg/s"/>
 
-    <!-- second order filter parameters -->
     <define name="FILT_CUTOFF" value="8.0"/>
     <define name="ESTIMATION_FILT_CUTOFF" value="8.0"/>
 
-    <!-- first order actuator dynamics -->
     <define name="ACT_FREQ_P" value="53.9"/>
     <define name="ACT_FREQ_Q" value="53.9"/>
     <define name="ACT_FREQ_R" value="53.9"/>
 
-    <!-- Adaptive Learning Rate -->
     <define name="USE_ADAPTIVE" value="FALSE"/>
     <define name="ADAPTIVE_MU" value="0.0001"/>
   </section>
@@ -252,11 +260,8 @@
   </section>
 
   <section name="GUIDANCE_H" prefix="GUIDANCE_H_">
-    <!-- Good weather -->
     <define name="MAX_BANK" value="20" unit="deg"/>
     <define name="REF_MAX_SPEED" value="0.5" unit="m/s"/>
-    <!-- Bad weather -->
-    <!-- define name="MAX_BANK" value="32" unit="deg"/ -->
     <define name="PGAIN" value="120"/>
     <define name="DGAIN" value="230"/>
     <define name="IGAIN" value="40"/>
@@ -272,6 +277,7 @@
     <define name="JSBSIM_MODEL" value="bebop" type="string"/>
     <define name="MT9F002_SENSOR_RES_DIVIDER" value="4"/>
   </section>
+
   <include href="conf/simulator/gazebo/airframes/bebop.xml"/>
 
   <section name="AUTOPILOT">
