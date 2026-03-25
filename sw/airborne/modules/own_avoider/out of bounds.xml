@@ -18,6 +18,8 @@ inline void setGuided(void){
   autopilot_static_set_mode(AP_MODE_GUIDED);
 }
 </header>
+
+
   <waypoints>
     <waypoint lat="51.990631" lon="4.376796" name="HOME"/>
     <waypoint name="CLIMB" x="1.9" y="1.0"/>
@@ -25,19 +27,29 @@ inline void setGuided(void){
     <waypoint name="TD" x="0.8" y="-1.7" height="0.5"/>
     <waypoint name="GOAL" x="1.9" y="1.0"/>
     <waypoint name="TRAJECTORY" x="1.9" y="1.0"/>
+
+    <!-- CyberZoo -->
     <waypoint lat="51.9905834" lon="4.3767710" name="_CZ1"/>
     <waypoint lat="51.9906440" lon="4.3767060" name="_CZ2"/>
     <waypoint lat="51.9906860" lon="4.3768080" name="_CZ3"/>
     <waypoint lat="51.9906238" lon="4.3768729" name="_CZ4"/>
+
+    <!-- Obstacle zone -->
     <waypoint lat="51.9906006" lon="4.3767764" name="_OZ1"/>
     <waypoint lat="51.9906405" lon="4.3767316" name="_OZ2"/>
     <waypoint lat="51.9906687" lon="4.3768025" name="_OZ3"/>
     <waypoint lat="51.9906273" lon="4.3768438" name="_OZ4"/>
+
+    <!-- 🔵 Turn Zone (shrunk inside CyberZoo) -->
+    <waypoint lat="51.9905900" lon="4.3767750" name="_TZ1"/>
+    <waypoint lat="51.9906420" lon="4.3767200" name="_TZ2"/>
+    <waypoint lat="51.9906800" lon="4.3768050" name="_TZ3"/>
+    <waypoint lat="51.9906300" lon="4.3768650" name="_TZ4"/>
   </waypoints>
 
-  <!--=== Sectors: define geofence regions ===-->
+    <!--=== Sectors: define geofence regions ===-->
   <sectors>
-    <!-- Outer geofence (hard stop, Cyberzoo walls) -->
+
     <sector color="red" name="CyberZoo">
       <corner name="_CZ1"/>
       <corner name="_CZ2"/>
@@ -45,17 +57,43 @@ inline void setGuided(void){
       <corner name="_CZ4"/>
     </sector>
 
-    <!-- Inner geofence (soft stop, obstacle zone) -->
     <sector color="#FF9922" name="ObstacleZone">
       <corner name="_OZ1"/>
       <corner name="_OZ2"/>
       <corner name="_OZ3"/>
       <corner name="_OZ4"/>
     </sector>
+
+    <!-- 🔵 Turn Zone -->
+    <sector color="blue" name="TurnZone">
+      <corner name="_TZ1"/>
+      <corner name="_TZ2"/>
+      <corner name="_TZ3"/>
+      <corner name="_TZ4"/>
+    </sector>
   </sectors>
 
   <!--=== Exceptions: handle emergencies and geofencing ===-->
   <exceptions>
+
+    <!-- Datalink lost -->
+    <exception cond="((datalink_time @GT 5) @AND
+      !(IndexOfBlock('Holding point') @GT nav_block) @AND
+      !(nav_block >= IndexOfBlock('land here')) @AND
+      (autopilot_in_flight() == true) )" deroute="land here"/>
+
+    <!-- 🔵 EARLY TURN -->
+    <exception cond="(!InsideTurnZone(GetPosX(), GetPosY()) @AND
+      InsideCyberZoo(GetPosX(), GetPosY()) @AND
+      !(nav_block >= IndexOfBlock('land here')) @AND
+      (autopilot_in_flight() == true))"
+      deroute="TURN_BACK"/>
+
+    <!-- 🔴 HARD SAFETY -->
+    <exception cond="(!InsideCyberZoo(GetPosX(), GetPosY()) @AND
+      !(IndexOfBlock('Holding point') @GT nav_block) @AND
+      !(nav_block >= IndexOfBlock('land here')) @AND
+      (autopilot_in_flight() == true) )" deroute="land here"/>
     <!-- RC lost -->
     <!--exception cond="((radio_control.status == RC_REALLY_LOST) @AND
       !(IndexOfBlock('Holding point') @GT nav_block) @AND
@@ -129,6 +167,12 @@ inline void setGuided(void){
 
     <block key="g" name="START" strip_button="Go" strip_icon="lookfore.png">
       <call_once fun="setGuided()"/>
+      <stay wp="STDBY"/>
+    </block>
+
+    <block name="TURN_BACK">
+      <call_once fun="setGuided()"/>
+      <exception cond="block_time @GT 2.0" deroute="START"/>
       <stay wp="STDBY"/>
     </block>
 

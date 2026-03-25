@@ -43,9 +43,9 @@
       <define name="COLOR_OBJECT_DETECTOR_LUM_MIN2" value="0"/>
       <define name="COLOR_OBJECT_DETECTOR_LUM_MAX2" value="255"/>
       <define name="COLOR_OBJECT_DETECTOR_CB_MIN2" value="0"/>
-      <define name="COLOR_OBJECT_DETECTOR_CB_MAX2" value="110"/>
+      <define name="COLOR_OBJECT_DETECTOR_CB_MAX2" value="125"/>
       <define name="COLOR_OBJECT_DETECTOR_CR_MIN2" value="0"/>
-      <define name="COLOR_OBJECT_DETECTOR_CR_MAX2" value="130"/>
+      <define name="COLOR_OBJECT_DETECTOR_CR_MAX2" value="150"/>
     </target>
 
   <!-- Subsystem section -->
@@ -57,7 +57,7 @@
     <module name="gps" type="datalink"/>
     <module name="stabilization" type="indi_simple"/>
     <module name="stabilization" type="rate_indi"/>
-    <module name="ahrs" type="int_cmpl_quat">
+    <module name="ahrs" type="float_mlkf">
       <configure name="USE_MAGNETOMETER" value="FALSE"/>
       <define name="AHRS_USE_GPS_HEADING" value="TRUE"/>
     </module>
@@ -83,23 +83,20 @@
       <define name="COLOR_OBJECT_DETECTOR_FPS2" value="0"/>
       <define name="COLOR_OBJECT_DETECTOR_DRAW2" value="1"/>
     </module>
-    <module name="orange_avoider_guided">
-      <define name="ORANGE_AVOIDER_VISUAL_DETECTION_ID" value="COLOR_OBJECT_DETECTION1_ID"/>
-      <define name="FLOOR_VISUAL_DETECTION_ID" value="COLOR_OBJECT_DETECTION2_ID"/>
-    </module>
     <module name="video_rtp_stream">
       <define name="VIEWVIDEO_CAMERA" value="front_camera"/>
       <define name="VIEWVIDEO_CAMERA2" value="bottom_camera"/>
       <define name="VIEWVIDEO_DOWNSIZE_FACTOR" value="1"/>
       <define name="VIEWVIDEO_QUALITY_FACTOR" value="40"/>
     </module>
+    <module name="own_avoider"/>
   </firmware>
 
   <commands>
     <axis name="PITCH" failsafe_value="0"/>
     <axis name="ROLL" failsafe_value="0"/>
     <axis name="YAW" failsafe_value="0"/>
-    <axis name="THRUST" failsafe_value="6000"/>
+    <axis name="THRUST" failsafe_value="0"/>
   </commands>
 
   <servos driver="Default">

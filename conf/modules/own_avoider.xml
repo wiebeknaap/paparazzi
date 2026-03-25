@@ -1,0 +1,26 @@
+<!DOCTYPE module SYSTEM "module.dtd">
+<module name="own_avoider">
+  <doc>
+    <description>
+      Guided obstacle avoider using VISUAL_DETECTION ABI messages.
+    </description>
+    <define name="SIMPLE_OBSTACLE_AVOIDER_VISUAL_DETECTION_ID"
+            value="ABI_BROADCAST"
+            description="Which VISUAL_DETECTION message to receive."/>
+  </doc>
+
+  <dep>
+    <depends>cv_detect_color_object</depends>
+  </dep>
+
+  <header>
+    <file name="simple_obstacle_avoider.h"/>
+  </header>
+
+  <init fun="simple_obstacle_avoider_init()"/>
+  <periodic fun="simple_obstacle_avoider_periodic()" freq="10"/>
+
+  <makefile>
+    <file name="simple_obstacle_avoider.c"/>
+  </makefile>
+</module>
