@@ -30,10 +30,10 @@ int32_t weight_pole = 400;
 int32_t weight_plant = 600;
 
 // 5. Navigation Settings
-float turn_speed_avoid = 10.0f;    // Degrees to turn Left
-float turn_speed_recover = 25.0f;  // Degrees to turn when OOB
-float dist_forward_safe = 2.0f;    // Speed when clear
-float dist_forward_avoid = 1.2f;   // Speed when avoiding
+float turn_speed_avoid = 12.0f;    // Degrees to turn Left
+float turn_speed_recover = 15.0f;  // Degrees to turn when OOB
+float dist_forward_safe = 1.5f;    // Speed when clear
+float dist_forward_avoid = 1.0f;   // Speed when avoiding
 
 // --- INTERNAL GLOBALS ---
 static int32_t orange_pixels = 0;
