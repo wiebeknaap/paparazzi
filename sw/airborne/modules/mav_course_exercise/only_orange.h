@@ -15,7 +15,7 @@ struct orange_info {
 };
 
 
-struct kalman_1d {
+struct kalman {
   float x;
   float p;
   float q;
@@ -51,12 +51,12 @@ void only_orange_init(void);
 void only_orange_periodic(void);
 
 void set_orange_fractions(float left_fraction, float middle_fraction, float right_fraction);
-void update_detection_flags(struct orange_info *orange);
+void update_detection(struct orange_info *orange);
 void temporal_filter(void);
 int update_confidence(const struct orange_info *orange);
 enum action decide_action(const struct orange_info *orange, int confidence);
 const char *action_name(enum action action);
 
-void kalman_init(struct kalman_1d *kf, float process_variance, float measurement_variance, float initial_value);
-float kalman_update(struct kalman_1d *kf, float measurement);
+void kalman_init(struct kalman *kf, float process_variance, float measurement_variance, float initial_value);
+float kalman_update(struct kalman *kf, float measurement);
 #endif
