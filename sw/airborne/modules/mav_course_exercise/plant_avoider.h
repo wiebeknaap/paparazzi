@@ -14,10 +14,10 @@
 #define PLANT_AVOIDER_FPS 4
 #endif
 
-#define SOBEL_THRESHOLD        30
+#define SOBEL_THRESHOLD        20
 #define EDGE_DENSITY_THRESHOLD 0.16f
-#define MIN_VERTICAL_FILL      0.03f
-#define TURN_THRESHOLD         0.56f
+#define MIN_VERTICAL_FILL      0.1f
+#define TURN_THRESHOLD         0.6f
 
 #define ROI_X_START 0.1f
 #define ROI_X_END   0.9f
