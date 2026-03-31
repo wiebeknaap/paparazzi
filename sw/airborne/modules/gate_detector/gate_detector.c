@@ -1,7 +1,7 @@
 /*
  * gate_detector.c
  *
- * Blue post-pair gate detector for Paparazzi — pure C, no OpenCV.
+ * Blue post-pair gate detector for Paparazzi
  * Processes YUV422 (UYVY) camera images directly.
  *
  * ── Algorithm overview ────────────────────────────────────────────────────────
@@ -96,6 +96,22 @@
  * GCS-settable parameters (also exported via gate_detector.h)
  * ────────────────────────────────────────────────────────────────────────────*/
 
+/* ─────────────────────────────────────────────────────────────────────────────
+ * aka tunable detector parameters
+ * ────────────────────────────────────────────────────────────────────────────
+ *
+ * These values define the operating point of the detector.
+ * They are intentionally exposed so they can be tuned from the ground station
+ * or changed in one place without rewriting the detector logic.
+ *
+ * In practice:
+ *   - gate_u_min / gate_v_max control how "blue" a pixel must be
+ *   - gate_min_confidence controls how strict the final decision is
+ *   - gate_purity_u_floor rejects warm-coloured pillars and similar clutter
+ *   - gate_col_density_min rejects sparse vertical artefacts
+ *   - gate_debug_overlay enables visual debugging on the video stream
+ */
+
 uint8_t gate_u_min          = GATE_U_MIN;
 uint8_t gate_v_max          = GATE_V_MAX;
 float   gate_min_confidence = GATE_MIN_CONFIDENCE;
@@ -156,6 +172,12 @@ static struct video_listener  *_listener = NULL;
  * Both pixels in the pair share the same U and V.
  */
 static inline bool is_blue_yuv(uint8_t U, uint8_t Y, uint8_t V)
+
+/*
+   * The detector deliberately uses a simple chroma test here.
+   * This keeps the first stage cheap: if a pixel is clearly not blue,
+   * it never enters the more expensive geometric reasoning later on.
+   */
 {
   return (U > gate_u_min)   &&   /* blue dominant                 */
          (V < gate_v_max)   &&   /* not red / orange              */
@@ -175,6 +197,9 @@ static inline bool is_blue_yuv(uint8_t U, uint8_t Y, uint8_t V)
  * reject floor-mat and ground-plane clutter.
  *
  * Returns: total number of blue pixels (used for global density gate).
+ * We do not build a full binary image and then run expensive contour logic.
+ * Instead, we compress the frame into per-column statistics immediately.
+ * This is one of the main reasons the detector stays lightweight.
  */
 static uint32_t gate_scan_columns(const uint8_t *buf, uint16_t w, uint16_t h)
 {
@@ -501,6 +526,17 @@ static float gate_score_pair(const uint8_t *buf,
 {
   /* Ensure left post is on the left */
   if (lp->cx > rp->cx) { const GPost *t = lp; lp = rp; rp = t; }
+  
+  /*
+   * This is the main decision function of the detector.
+   *
+   * Strategy:
+   *   1. Rejecting obviously impossible pairs quickly with hard vetoes.
+   *   2. For the remaining pairs, compute a weighted score from several cues.
+   *   3. Returning a confidence in [0,1].
+   *
+   * In other words: fast elimination first, detailed comparison second.
+   */
 
   /* ── Hard geometry vetoes ─────────────────────────────────────────────── */
 
@@ -564,6 +600,12 @@ static float gate_score_pair(const uint8_t *buf,
   /* 8. Checker bar (0.14): alternating B/W above posts */
   int16_t y_top_pair = GATE_MIN2(lp->y0, rp->y0);
   float checker    = gate_checker(buf, w, h, lp, rp, y_top_pair, pair_h);
+  
+    /*
+   * No single cue is trusted on its own.
+   * The final score combines geometry, color, emptiness of the opening,
+   * and top-bar texture so that one weak feature does not dominate.
+   */
 
   /* ── Weighted sum ─────────────────────────────────────────────────────── */
   float score =
@@ -575,6 +617,12 @@ static float gate_score_pair(const uint8_t *buf,
       0.14f * profile    +
       0.08f * iso_score  +
       0.14f * checker;
+      
+      /*
+   * No single cue is trusted on its own.
+   * The final score combines geometry, color, emptiness of the opening,
+   * and top-bar texture so that one weak feature does not dominate.
+   */
 
   /* Extra penalty for very low overlap (posts barely touch vertically) */
   if (overlap < 0.40f) score -= (0.40f - overlap) * 0.25f;
